@@ -5,6 +5,16 @@ import sys
 
 
 def build_tram_stops(jsonobject):
+    """For buiding up the stop dictionary, where
+
+    Args:
+        jsonobject (json object): tramstops.json
+
+    Returns:
+        dictionary: 
+            * keys are names of tram stops
+            * values are dictionaries with the latitude and the longitude
+    """
     stop_dict = dict()
     for stop in jsonobject.keys():
         stop_dict[stop] = dict()
@@ -14,6 +24,16 @@ def build_tram_stops(jsonobject):
 
 
 def build_tram_lines(lines):
+    """For buidling up the line dictionary
+
+    Args:
+        lines (a read txt file): tramlines.txt
+
+    Returns:
+        dictionary: 
+            * keys are names (usually consisting of digits, but to be treated as strings)
+            * values are lists of stop names, in the order in which the tram runs
+    """
     line_dict = dict()
     cur_tram = None
     cur_stop = None
@@ -32,10 +52,22 @@ def build_tram_lines(lines):
 
 
 def build_tram_times(lines):
+    """For building up the time dictionary
+
+    Args:
+        lines (a read txt file): tramlines.txt
+
+    Returns:
+        dictionary: 
+            * keys are stop names
+            * values are dictionaries from stop names to numbers of minutes
+    """
     time_dict = dict()
+    # Initialization temp values
     cur_tram = None
     cur_stop, prev_stop = None, None
     h, m, ph, pm = 0, 0, 0, 0
+    # indicating if it is reading info for a new tram line
     new_line = False
     for line in lines:
         line_list = line.split()
@@ -64,6 +96,12 @@ def build_tram_times(lines):
 
 
 def build_tram_network(transtops, tramlines):
+    """Puts everything together, reads two input files and writes a third json file containing one big dictionary
+
+    Args:
+        transtops (json object): tramstops.json
+        tramlines (a read txt file): tramlines.txt
+    """
     with open(transtops, 'r') as jfile:
         jsonobject = json.load(jfile)
     with open(tramlines, 'r') as f:
@@ -78,23 +116,91 @@ def build_tram_network(transtops, tramlines):
         json.dump(output_dict, jfile, indent=4)
 
 
-def lines_via_stop(line_dict, stop):
+def line_exist(tramdict, line):
+    """Check if the request line exist
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        line (string): quired line
+
+    Returns:
+        bool: if the request line exist
+    """
+    return line in tramdict['lines']
+
+
+def stop_exist(tramdict, stop):
+    """Check if the request stop exist
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        line (string): quired stop
+
+    Returns:
+        bool: if the request stop exist
+    """
+    return stop in tramdict['stops']
+
+
+def lines_via_stop(tramdict, stop):
+    """A query function that lists the lines that go via the given stop
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        stop (string): requested stop name
+
+    Returns:
+        list: a list of lines that go via the given stop
+    """
+    if not stop_exist(tramdict, stop):
+        return "unknown arguments"
+    line_dict = tramdict['lines']
     lines = [line for line in line_dict if stop in line_dict[line]]
     lines.sort(key=lambda a: int(a))
     return lines
 
 
-def lines_between_stops(line_dict, stop1, stop2): 
+def lines_between_stops(tramdict, stop1, stop2): 
+    """A query function that lists the lines that go from stop1 to stop2
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        stop1 (string): first requested stop name
+        stop2 (string): second requested stop name (should be different from stop1)
+
+    Returns:
+        list: a list of lines that go from stop1 to stop2
+    """
+    if not stop_exist(tramdict, stop1) or not stop_exist(tramdict, stop2):
+        return "unknown arguments"
+    if stop1 == stop2:
+        return("Please enter two different stops!")
+    line_dict = tramdict['lines']
     lines = [line for line in line_dict if stop1 in line_dict[line] and stop2 in line_dict[line]]
     lines.sort(key=lambda a: int(a))
     return lines
 
 
-def time_between_stops(line_dict, time_dict, line, stop1, stop2):
+def time_between_stops(tramdict, line, stop1, stop2):
+    """A query function that calculates the time from stop1 to stop2 along the given line
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        line (string): a tram line number
+        stop1 (string): first requested stop name
+        stop2 (string): second requested stop name (should be different from stop1)
+
+    Returns:
+        int: time bwteen two stops along given line
+    """
+    if not line_exist(tramdict, line):
+        return "unknown arguments"
+    if not stop_exist(tramdict, stop1) or not stop_exist(tramdict, stop2):
+        return "unknown arguments"
     if stop1 == stop2:
-        return("{} and {} are the same stop".format(stop1, stop2))
-    elif stop1 not in line_dict[line] or stop2 not in line_dict[line]:
-        return("{} and {} are not on line {}".format(stop1, stop2, line))
+        return("Please enter two different stops!")
+    line_dict = tramdict['lines']
+    time_dict = tramdict['times']
     time = 0
     index1 = line_dict[line].index(stop1)
     index2 = line_dict[line].index(stop2)
@@ -110,7 +216,22 @@ def time_between_stops(line_dict, time_dict, line, stop1, stop2):
     return time
 
 
-def distance_between_stops(stop_dict, stop1, stop2):
+def distance_between_stops(tramdict, stop1, stop2):
+    """A query function that calculates the geographic distance between any two stops, based on their latitude and longitude
+
+    Args:
+        tramdict (dictionary): generated comprehensive dictionary stored in tramnetwork.json
+        stop1 (string): first requested stop name
+        stop2 (string): second requested stop name (should be different from stop1)
+
+    Returns:
+        float: the geographic distance between any two stops (unit: Km, round to 3 digits)
+    """
+    if not stop_exist(tramdict, stop1) or not stop_exist(tramdict, stop2):
+        return "unknown arguments"
+    if stop1 == stop2:
+        return("Please enter two different stops!")
+    stop_dict = tramdict['stops']
     Earth_Radius = 6371.009
     one_degree = math.pi/180
     lat1 = stop_dict[stop1]['lat'] * one_degree
@@ -138,6 +259,7 @@ def dialogue(jsonfile):
 
 
 def answer_query(tramdict, query):
+    
     def pack_args(func_num, args_messy):
         if func_num == 0:
             return (None, args_messy, None)
@@ -145,21 +267,13 @@ def answer_query(tramdict, query):
             return (None, args_messy[0], args_messy[1])
         else:
             return args_messy
+    
     def request_for_func(func_num, line=None, stop1=None, stop2=None):
-        line_dict = tramdict['lines']
-        stop_dict = tramdict['stops']
-        time_dict = tramdict['times']
         funcs = {
             0: lines_via_stop,
             1: lines_between_stops,
             2: time_between_stops,
             3: distance_between_stops
-        }
-        dicts = {
-            0: [line_dict],
-            1: [line_dict],
-            2: [line_dict, time_dict],
-            3: [stop_dict]
         }
         args_format = {
             0: [stop1],
@@ -167,11 +281,9 @@ def answer_query(tramdict, query):
             2: [line, stop1, stop2],
             3: [stop1, stop2]
         }
-
         func = funcs.get(func_num, "Invalid Function request")
-        dicts_useful = dicts.get(func_num, "Invalid Dictionary request")
         args = args_format.get(func_num, "Invalid Argument request")
-        return func(*dicts_useful, *args)
+        return func(tramdict, *args)
     
     re0 = r"via (.+)"
     re1 = r"between (.+) and (.+)"
