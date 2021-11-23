@@ -9,7 +9,7 @@ This repo is for studying the course DAT515 Advanced programming in Python at Ch
 **Note**: 
 - geographical distance function was implemented with just using the Math library, but the library [Haversine](https://pypi.org/project/haversine/) was used when testing our own implemented function, 
 - more helper functions were implemented besides the required functions,
-- in `lines_between_stops`, `time_between_stops`, and `time_between_stops`, two request stops are checked to be not same, otherwise "Please enter two different stops!" will be returned,
+- in `lines_between_stops`, `time_between_stops`, and `distance_between_stops`, two request stops are checked to be not same, otherwise "Please enter two different stops!" will be returned,
 - when testing for the dialogue function, expected answers were given manually, and only limited number of testing cases are given (meight be not comprehensive).
 
 Implemented Testing Cases:
