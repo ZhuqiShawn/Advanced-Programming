@@ -135,14 +135,12 @@ def dijkstra(graph, source, cost=lambda u,v: 1):
     Args:
         graph (Graph): an input Graph
         source (string): starting vertex
-        v (1): [description]
-        cost ([type], optional): [description]. Defaults to lambdau.
+        cost (function, optional): the cost function used to calculate the cost between two vertices. Defaults is 1.
 
     Returns:
         dict: a dictionary where the keys are all target vertices reachable from the source, 
               and their values are paths from the source to the target
     """
-    ################ !!!!!!!!!! Not complete -- cost function need to be added !!!!!!!!!! ################
     dist = {vtx: float('inf') for vtx in graph.vertices()}
     prev = {vtx: None for vtx in graph.vertices() if vtx != source}
     dist[source] = 0
@@ -151,11 +149,11 @@ def dijkstra(graph, source, cost=lambda u,v: 1):
     pq.put((dist[source], source))
     # main loop
     while not pq.empty():
-        d, cur_vtx = pq.get()
+        _, cur_vtx = pq.get()
         visted_vtx.append(cur_vtx)
         
         for neighbor in graph.neighbours(cur_vtx):
-            weight = graph.get_weight(cur_vtx, neighbor)
+            weight = cost(cur_vtx, neighbor)
             if neighbor not in visted_vtx:
                 old_cost = dist[neighbor]
                 new_cost = dist[cur_vtx] + weight
@@ -179,6 +177,14 @@ def dijkstra(graph, source, cost=lambda u,v: 1):
 
 
 def visualize(graph, view='dot', name='mygraph', nodecolors=None):
+    """Function to visualize a graph
+
+    Args:
+        graph (Graph): the graph to be visualized
+        view (str, optional): plot engine for plotting. Defaults to 'dot'.
+        name (str, optional): the file name of plot to be saved. Defaults to 'mygraph'.
+        nodecolors (dict, optional): colors to be added on stated nodes. Defaults to None.
+    """
     dot = graphviz.Graph(engine=view)
     for v in graph.vertices():
         if str(v) in nodecolors:
@@ -192,10 +198,8 @@ def visualize(graph, view='dot', name='mygraph', nodecolors=None):
 
 def view_shortest(G, source, target, cost=lambda u,v: 1):
     path = dijkstra(G, source, cost)[target]
-    print(path)
     colormap = {str(v): 'orange' for v in path}
-    print(colormap)
-    visualize(G, nodecolors=colormap)
+    visualize(G, view='dot', nodecolors=colormap)
 
 
 # TEST ONLY
@@ -203,9 +207,6 @@ def view_shortest(G, source, target, cost=lambda u,v: 1):
 def demo():
     adjlist = [(1,2),(1,3),(1,4),(3,4),(3,5),(3,6), (3,7), (6,7)]
     g = WeightedGraph(adjlist)
-    print(g)
-    for a, b in adjlist:
-        g.set_weight(a, b, 1)
     view_shortest(g, 2, 6)
 
 if __name__ == '__main__':
