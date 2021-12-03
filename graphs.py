@@ -12,12 +12,7 @@ class Graph:
         self._adjlist = dict()
         if start:
             for a, b in start:
-                if a not in self._adjlist:
-                    self._adjlist[a] = {'_value': None}
-                self._adjlist[a][b] = dict()
-                if b not in self._adjlist:
-                    self._adjlist[b] = {'_value': None}
-                self._adjlist[b][a] = dict()
+                self.add_edge(a,b)
 
     def __len__(self):
         "Return the length (number) of vertices."
@@ -46,7 +41,7 @@ class Graph:
                 if a <= b:
                     edges.add((a, b))
                 else:
-                    edges.add((b,a))
+                    edges.add((b, a))
         edges = list(edges)
         edges.sort(key=lambda a: (a[0], a[1]))
         return edges
@@ -58,11 +53,9 @@ class Graph:
     
     def add_edge(self, a, b):
         "Adds an edge, and the vertices if needed."
-        if a not in self._adjlist:
-            self._adjlist[a] = {'_value': None}
+        self.add_vertex(a)
         self._adjlist[a][b] = dict()
-        if b not in self._adjlist:
-            self._adjlist[b] = {'_value': None}
+        self.add_vertex(b)
         self._adjlist[b][a] = dict()
 
     def neighbours(self, v):
@@ -110,22 +103,22 @@ class WeightedGraph(Graph):
     def __init__(self, start=None):
         "Start with an input list of edges or an empty graph, weights are set to be None at first."
         super().__init__(start)
-        for vtx in self._adjlist:
-            for sub_vtx in self._adjlist[vtx]:
-                if sub_vtx != '_value':
-                    self._adjlist[vtx][sub_vtx]['weight'] = None
     
     def get_weight(self, a, b):
         "Returns the weight of an edge a -> b."
-        return self._adjlist[a][b]['weight']
+        if a in self._adjlist:
+            if b in self._adjlist[a]:
+                if 'weight' in self._adjlist[a][b]:
+                    return self._adjlist[a][b]['weight']
+                return "The weight between {} and {} has not been set"
+            return "Vertex {} does not have an neighbour {}".format(a,b)
+        return "{} is not in the current graph".format(a)
     
     def set_weight(self, a, b, weight):
         "Sets the weight of edge a -> b."
-        if a in self._adjlist:
-            if b in self._adjlist[a]:
+        if a in self._adjlist and b in self._adjlist:
+            if a in self._adjlist[b] and b in self._adjlist[a]:
                 self._adjlist[a][b]['weight'] = weight
-        if b in self._adjlist:
-            if a in self._adjlist[b]:
                 self._adjlist[b][a]['weight'] = weight
 
 
@@ -207,7 +200,7 @@ def view_shortest(G, source, target, cost=lambda u,v: 1):
 def demo():
     adjlist = [(1,2),(1,3),(1,4),(3,4),(3,5),(3,6), (3,7), (6,7)]
     g = WeightedGraph(adjlist)
-    view_shortest(g, 2, 6)
+    view_shortest(g, 2, 7)
 
 if __name__ == '__main__':
     demo()
