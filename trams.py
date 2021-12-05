@@ -1,3 +1,0 @@
-# amao gogogo!
-
-# haojiahuo, wohaizaixunsizhegewenjianshiganshade

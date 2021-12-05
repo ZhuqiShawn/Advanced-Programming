@@ -102,9 +102,9 @@ def build_tram_network(transtops, tramlines):
         transtops (json object): tramstops.json
         tramlines (a read txt file): tramlines.txt
     """
-    with open(transtops, 'r') as jfile:
+    with open(transtops, 'r', encoding='utf-8') as jfile:
         jsonobject = json.load(jfile)
-    with open(tramlines, 'r') as f:
+    with open(tramlines, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     stop_dict = build_tram_stops(jsonobject)
     line_dict = build_tram_lines(lines)
