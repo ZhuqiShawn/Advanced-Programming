@@ -5,6 +5,19 @@ import graphs
 import tramdata as td
 
 class TramStop:
+    '''
+    Define the TramStop class
+
+    Store: name-str: The name of stops
+           lines-list: All the lines which pass this stop
+           position-tuple: The position of stop (lat and lon)
+
+    Function: add_line(line) : Add line to lines
+              get_lines() : Get all lines passing this platform
+              get_name() : Get the name of this stop
+              get_position() : Get the position of this stop
+              set_position(lat, lon) : Set position of this stop
+    ''' 
     def __init__(self, name, lines = [], lat = 0, lon = 0):
         self._name = str(name)
         self._lines = lines
@@ -12,14 +25,14 @@ class TramStop:
 
     def add_line(self, line):
         line = str(line)
-        if line not in self.lines:
-            self.lines.append(line)
+        if line not in self._lines:
+            self._lines.append(line)
 
     def get_lines(self):
-        return self.lines
+        return self._lines
 
     def get_name(self):
-        return self.name
+        return self._name
 
     def get_position(self):
         return self._position
@@ -29,6 +42,16 @@ class TramStop:
 
 
 class TramLine:
+    '''
+    Define the TramLine class
+
+    Store: number-str: the number of line, but transfer to str
+           stops-list: All stops where line pass
+
+    Function: get_number() : Get the number of this line
+              get_stops() : Get all stops where line pass
+
+    ''' 
     def __init__(self, num, stops = []):
         self._number = str(num)
         self._stops = stops
@@ -37,11 +60,19 @@ class TramLine:
         return self._number
 
     def get_stops(self):
-        return self._stops
+        return list(self._stops)
 
 
 
 class TramNetwork(graphs.WeightedGraph):
+    '''
+    Define the TramNetwork class
+
+    Store: 
+
+    Function: 
+
+    ''' 
     def __init__(self, lines, stops, times, start=None):
         super().__init__(start=start)
 
@@ -53,10 +84,14 @@ class TramNetwork(graphs.WeightedGraph):
         self._stopdict = {}
         if stops:
             for stop in stops:
+
                 _tmp_stop_line = []
                 for line in lines:
-                    if stop in stops:
-                        self._stopdict[stop] = TramStop(stop, lines = _tmp_stop_line, lat = stops[stop]['lat'], lon = stops[stop]['lon'])
+                    if stop in self._linedict[line].get_stops():
+                        _tmp_stop_line.append(line)
+                
+                self._stopdict[stop] = TramStop(stop, lines = _tmp_stop_line, lat = stops[stop]['lat'], lon = stops[stop]['lon'])
+
 
         self._timedict = {}
         if times:
@@ -84,10 +119,10 @@ class TramNetwork(graphs.WeightedGraph):
             return("Please enter two different stops!")
         Earth_Radius = 6371.009
         one_degree = math.pi/180
-        lat1 = self._stopdict[a]._position[0] * one_degree
-        lon1 = self._stopdict[a]._position[1] * one_degree
-        lat2 = self._stopdict[b]._position[0] * one_degree
-        lon2 = self._stopdict[b]._position[1] * one_degree
+        lat1 = self._stopdict[a].get_position()[0] * one_degree
+        lon1 = self._stopdict[a].get_position()[1] * one_degree
+        lat2 = self._stopdict[b].get_position()[0] * one_degree
+        lon2 = self._stopdict[b].get_position()[1] * one_degree
 
         dlon = lon2 - lon1
         dlat = lat2 - lat1
@@ -97,8 +132,11 @@ class TramNetwork(graphs.WeightedGraph):
         return round(distance, 3)
 
     def line_stop(self, line):
-        # line = str(line)
-        return (self._linedict[line].get_stops())
+        line = str(line)
+        if line in list(self._linedict.keys()):
+            return self._linedict[line].get_stops()
+        return("The line {} is not exist".format(line))
+
 
 
     def remove_lines(self, lines):
@@ -106,37 +144,34 @@ class TramNetwork(graphs.WeightedGraph):
 
         for line in lines:
             if line in list(self._linedict.keys()):
-                # if the stop in this line but not in other lines, del stop object
-                # for stop in self._linedict[line]._stops:
-                #     stop_in_otherline = 0
-                #     for _line in list(self._linedict.keys()):
-                #         for _stop in self._linedict[_line]._stops:
-                #             if _stop == stop:
-                #                 if _line != line:
-                #                     stop_in_otherline = 1
-                    
-                #     if stop_in_otherline:
-                #         print('del {}'.format(stop))
-                #         del self._stopdict[stop]
                 del self._linedict[line]
+            
+            line_stops = self._linedict[line]._stops
+            for i in range(len(line_stops)):
+                if line_stops[i] in list(self._timedict.keys()):
+                    if line_stops[i+1] in list(self._timedict[line_stops[i]].keys):
+                        del self._timedict[line_stops[i]][line_stops[i+1]]
+            
+            line_stops = line_stops[::-1]
+            for i in range(len(line_stops)):
+                if line_stops[i] in list(self._timedict.keys()):
+                    if line_stops[i+1] in list(self._timedict[line_stops[i]].keys):
+                        del self._timedict[line_stops[i]][line_stops[i+1]]
             
             for stop in self._stopdict:
                 if line in self._stopdict[stop]._lines:
                     del self._stopdict._lines[stop][line]
 
-
-        
-
-
     def stop_lines(self, a):
         if a:
             if a in self._stopdict:
-                return self._stopdict[a]._lines
+                return self._stopdict[a].get_lines()
+        
 
     def stop_position(self, a):
         if a:
             if a in self._stopdict:
-                return self._stopdict[a]._position
+                return self._stopdict[a].get_position()
 
     def transition_time(self, a, b):
         if a and b:
