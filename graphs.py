@@ -158,14 +158,20 @@ def dijkstra(graph, source, cost=lambda u,v: 1):
     shortest_path = dict()
     for vtx in graph.vertices():
         if vtx != source:
+            possible = True
             t = vtx
             path = list()
             while t != source:
-                path.append(t)
-                t = prev[t]
-            path.append(source)
-            path.reverse()
-            shortest_path[vtx] = path
+                if t in prev:
+                    path.append(t)
+                    t = prev[t]
+                else:
+                    possible = False
+                    break
+            if possible:
+                path.append(source)
+                path.reverse()
+                shortest_path[vtx] = path
     return shortest_path
 
 
@@ -180,8 +186,11 @@ def visualize(graph, view='dot', name='mygraph', nodecolors=None):
     """
     dot = graphviz.Graph(engine=view)
     for v in graph.vertices():
-        if str(v) in nodecolors:
-            dot.node(str(v), style='filled', fillcolor=nodecolors[str(v)])
+        if nodecolors:
+            if str(v) in nodecolors:
+                dot.node(str(v), style='filled', fillcolor=nodecolors[str(v)])
+            else:
+                dot.node(str(v))
         else:
             dot.node(str(v))
     for a,b in graph.edges():
@@ -190,17 +199,24 @@ def visualize(graph, view='dot', name='mygraph', nodecolors=None):
 
 
 def view_shortest(G, source, target, cost=lambda u,v: 1):
-    path = dijkstra(G, source, cost)[target]
-    colormap = {str(v): 'orange' for v in path}
-    visualize(G, view='dot', nodecolors=colormap)
+    path = dijkstra(G, source, cost)
+    if target in path:
+        colormap = {str(v): 'orange' for v in path[target]}
+        visualize(G, view='dot', nodecolors=colormap)
+    else:
+        print("No way from {} to {}".format(source, target))
 
 
 # TEST ONLY
 
 def demo():
     adjlist = [(1,2),(1,3),(1,4),(3,4),(3,5),(3,6), (3,7), (6,7)]
+    # adjlist = [(1,2), (3,3)]
     g = WeightedGraph(adjlist)
+    # print(g)
+    # visualize(g)
     view_shortest(g, 2, 7)
+    # view_shortest(g, 1, 3)
 
 if __name__ == '__main__':
     demo()
