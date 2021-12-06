@@ -1,9 +1,7 @@
-from datetime import time
-import math
-from hypothesis import given, strategies as st
-import hypothesis
 import tram
 import json
+import hypothesis
+from hypothesis import given, strategies as st
 
 gener_int = st.integers(min_value=0, max_value=100)
 alphabet = [chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]

@@ -21,7 +21,7 @@ class TramStop:
     def __init__(self, name, lines = [], lat = 0, lon = 0):
         self._name = str(name)
         self._lines = lines
-        self._position = ((float(lat), float(lon)))
+        self.set_position( lat, lon)
 
     def add_line(self, line):
         line = str(line)
@@ -38,7 +38,7 @@ class TramStop:
         return self._position
 
     def set_position(self, lat, lon):
-        self._position(float(lat), float(lon))
+        self._position = (float(lat), float(lon))
 
 
 class TramLine:
