@@ -3,13 +3,12 @@ import hypothesis
 import tram
 
 gener_int = st.integers(min_value=0, max_value=100)
-
 alphabet = [chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
 gener_strings = st.text(alphabet=alphabet, min_size=6, max_size=9)
 gener_stops = st.lists(gener_strings, min_size=8, max_size=11, unique_by=lambda x: x[0])
 gener_line_stops = st.dictionaries(gener_int, gener_stops, min_size=8, max_size=10)
 
-@hypothesis.settings(max_examples=3)
+@hypothesis.settings(max_examples=6)
 @given(gener_line_stops)
 def test_line(gener_line_stops):
     lines = gener_line_stops
@@ -25,4 +24,21 @@ def test_line(gener_line_stops):
     for line in lines:
         assert lines[line] == tramnetwork.line_stop(line)
 
-test_line()
+gener_strings = st.text(alphabet=alphabet, min_size=6, max_size=9)
+gener_floats = st.floats(min_value=57.6, max_value=57.9)
+gener_posi = st.dictionaries(st.sampled_from(['lat','lon']), gener_floats, min_size=2, max_size=2)
+gener_stops = st.dictionaries(gener_strings, gener_posi, min_size=40, max_size=50)
+
+@hypothesis.settings(max_examples=6)
+@given(gener_stops)
+def test_stops(gener_stops):
+    stops = gener_stops
+    tramnetwork =  tram.TramNetwork({}, stops, {}, start=None)
+
+    assert len(stops) == len(tramnetwork._stopdict)
+    assert list(set([stop for stop in stops.keys()])) == list(set(tramnetwork.all_stops()))
+
+    for stop in stops:
+        assert stops[stop]['lat'] == tramnetwork.stop_position(stop)[0]
+        assert stops[stop]['lon'] == tramnetwork.stop_position(stop)[1]
+
