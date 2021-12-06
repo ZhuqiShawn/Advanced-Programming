@@ -8,9 +8,9 @@ class TramStop:
     '''
     Define the TramStop class
 
-    Store: name-str: The name of stops
-           lines-list: All the lines which pass this stop
-           position-tuple: The position of stop (lat and lon)
+    Values: name-str: The name of stops
+            lines-list: All the lines which pass this stop
+            position-tuple: The position of stop (lat and lon)
 
     Function: add_line(line) : Add line to lines
               get_lines() : Get all lines passing this platform
@@ -45,7 +45,7 @@ class TramLine:
     '''
     Define the TramLine class
 
-    Store: number-str: The number of line, but transfer to str
+    Values: number-str: The number of line, but transfer to str
            stops-list: All stops where line pass
 
     Function: get_number() : Get the number of this line
@@ -68,9 +68,9 @@ class TramNetwork(gr.WeightedGraph):
     '''
     Define the TramNetwork class
 
-    Store: _linedict : A dictory, the key is line(str), the value is the TramLine object
-           _stopdict : A dictory, the key is stop name(str), the value is the TramStop object
-           _timedict : A dictory, the key is stop1 name(str), 
+    Values: _linedict : A dictory, the key is line(str), the value is the TramLine object
+            _stopdict : A dictory, the key is stop name(str), the value is the TramStop object
+            _timedict : A dictory, the key is stop1 name(str), 
                        the value is dictory, key is the stop names close to stop1, the value is the time cost
 
     Function: all_lines(): Get all lines, return list
@@ -78,10 +78,10 @@ class TramNetwork(gr.WeightedGraph):
               extreme_positions(): pass
               geo_distance(): Get the distance between two stop, return float
               line_stop(): Get all the stops of this line, return list
-              remove_lines(): Remove one line or some lines from _linedict
-              stop_lines()
-              stop_position()
-              transition_time()
+              remove_lines(): Remove one line or some lines from _linedict, _timedict, also call remove_edge function
+              stop_lines(): Get all the lines will stop in this stop, return list
+              stop_position(): Get the position of this stop, Retrun tuple
+              transition_time(a,b): Get the time cost from stop a to stop b
     ''' 
     def __init__(self, lines, stops, times, start):
         super().__init__(start)
@@ -195,7 +195,15 @@ class TramNetwork(gr.WeightedGraph):
                 return '{} and {} are not adjacent'.format(a,b)
             
 
+
 def readTramNetwork(tramfile='./tramnetwork.json'):
+    '''
+    Define the readTramNetwork function
+
+    Input: the path of json file
+
+    Output: a object of tramnetwork
+    ''' 
     with open(tramfile, 'r', encoding='utf-8') as jfile:
         tramnetwork = json.load(jfile)
 
