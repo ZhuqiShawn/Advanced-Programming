@@ -21,7 +21,7 @@ class TramStop:
     def __init__(self, name, lines = [], lat = 0, lon = 0):
         self._name = str(name)
         self._lines = lines
-        self._position = (lat, lon)
+        self._position = ((float(lat), float(lon)))
 
     def add_line(self, line):
         line = str(line)
@@ -89,7 +89,8 @@ class TramNetwork(gr.WeightedGraph):
         self._linedict = {}
         if lines:
             for line in lines:
-                self._linedict[line] = TramLine(line, lines[line])
+                self._linedict[str(line)] = TramLine(line, lines[line])
+
 
         self._stopdict = {}
         if stops:
@@ -204,6 +205,7 @@ def readTramNetwork(tramfile='./tramnetwork.json'):
 
     Output: a object of tramnetwork
     ''' 
+
     with open(tramfile, 'r', encoding='utf-8') as jfile:
         tramnetwork = json.load(jfile)
 
@@ -212,10 +214,11 @@ def readTramNetwork(tramfile='./tramnetwork.json'):
     times = tramnetwork['times']
 
     tramnetwork =  TramNetwork(lines, stops, times, start=None)
-    for stop1 in times:
-        for stop2 in times[stop1]:
-            tramnetwork.add_edge(stop1, stop2)
-            tramnetwork.set_weight(stop1, stop2, times[stop1][stop2])
+    if times:
+        for stop1 in times:
+            for stop2 in times[stop1]:
+                tramnetwork.add_edge(stop1, stop2)
+                tramnetwork.set_weight(stop1, stop2, times[stop1][stop2])
     return tramnetwork
 
 
