@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import math
 import json
-import graphs
+import graphs as gr
 import tramdata as td
 
 class TramStop:
@@ -45,7 +45,7 @@ class TramLine:
     '''
     Define the TramLine class
 
-    Store: number-str: the number of line, but transfer to str
+    Store: number-str: The number of line, but transfer to str
            stops-list: All stops where line pass
 
     Function: get_number() : Get the number of this line
@@ -64,17 +64,27 @@ class TramLine:
 
 
 
-class TramNetwork(graphs.WeightedGraph):
+class TramNetwork(gr.WeightedGraph):
     '''
     Define the TramNetwork class
 
-    Store: 
+    Store: _linedict : A dictory, the key is line(str), the value is the TramLine object
+           _stopdict : A dictory, the key is stop name(str), the value is the TramStop object
+           _timedict : A dictory, the key is stop1 name(str), 
+                       the value is dictory, key is the stop names close to stop1, the value is the time cost
 
-    Function: 
-
+    Function: all_lines()
+              all_stops()
+              extreme_positions()
+              geo_distance()
+              line_stop()
+              remove_lines()
+              stop_lines()
+              stop_position()
+              transition_time()
     ''' 
-    def __init__(self, lines, stops, times, start=None):
-        super().__init__(start=start)
+    def __init__(self, lines, stops, times, start):
+        super().__init__(start)
 
         self._linedict = {}
         if lines:
@@ -96,6 +106,7 @@ class TramNetwork(graphs.WeightedGraph):
         self._timedict = {}
         if times:
             self._timedict = times
+            
     
     def all_lines(self):
         return list(self._linedict.keys())
@@ -189,6 +200,18 @@ def readTramNetwork(tramfile='./tramnetwork.json'):
     stops = tramnetwork['stops']
     times = tramnetwork['times']
 
-    return TramNetwork(lines, stops, times, start=None)
+    tramnetwork =  TramNetwork(lines, stops, times, start=None)
+    for stop1 in times:
+        for stop2 in times[stop1]:
+            tramnetwork.add_edge(stop1, stop2)
+            tramnetwork.set_weight(stop1, stop2, times[stop1][stop2])
+    return tramnetwork
 
 
+def demo():
+    G = readTramNetwork()
+    a, b = input('from,to ').split(',')
+    gr.view_shortest(G, a, b)
+
+if __name__ == '__main__':
+        demo()
