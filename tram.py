@@ -73,12 +73,12 @@ class TramNetwork(gr.WeightedGraph):
            _timedict : A dictory, the key is stop1 name(str), 
                        the value is dictory, key is the stop names close to stop1, the value is the time cost
 
-    Function: all_lines()
-              all_stops()
-              extreme_positions()
-              geo_distance()
-              line_stop()
-              remove_lines()
+    Function: all_lines(): Get all lines, return list
+              all_stops(): Get all stops, return list
+              extreme_positions(): pass
+              geo_distance(): Get the distance between two stop, return float
+              line_stop(): Get all the stops of this line, return list
+              remove_lines(): Remove one line or some lines from _linedict
               stop_lines()
               stop_position()
               transition_time()
@@ -162,16 +162,19 @@ class TramNetwork(gr.WeightedGraph):
                 if line_stops[i] in list(self._timedict.keys()):
                     if line_stops[i+1] in list(self._timedict[line_stops[i]].keys):
                         del self._timedict[line_stops[i]][line_stops[i+1]]
+                        self.remove_edge(line_stops[i], line_stops[i+1])
             
             line_stops = line_stops[::-1]
             for i in range(len(line_stops)):
                 if line_stops[i] in list(self._timedict.keys()):
                     if line_stops[i+1] in list(self._timedict[line_stops[i]].keys):
                         del self._timedict[line_stops[i]][line_stops[i+1]]
+                        self.remove_edge(line_stops[i], line_stops[i+1])
             
             for stop in self._stopdict:
                 if line in self._stopdict[stop]._lines:
                     del self._stopdict._lines[stop][line]
+            
 
     def stop_lines(self, a):
         if a:
