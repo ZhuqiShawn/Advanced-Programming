@@ -13,9 +13,8 @@ gener_line_stops = st.dictionaries(gener_int, gener_stops, min_size=8, max_size=
 @given(gener_line_stops)
 def test_lines(gener_line_stops):
     lines = gener_line_stops
-    tramnetwork =  tram.TramNetwork(lines, {}, {}, start=None)
-
-    assert len(lines) == len(tramnetwork._linedict)
+    tramnetwork =  tram.TramNetwork(lines, {}, {})
+    assert len(lines) == len(tramnetwork.all_lines())
     assert list(set([str(line) for line in lines.keys()])) == list(set(tramnetwork.all_lines()))
 
     all_stop1 = [stop for line in lines for stop in lines[line]]
@@ -23,7 +22,7 @@ def test_lines(gener_line_stops):
 
     assert len(all_stop1) == len(all_stop2)
     for line in lines:
-        assert lines[line] == tramnetwork.line_stop(line)
+        assert lines[line] == tramnetwork.line_stops(line)
 
 gener_strings = st.text(alphabet=alphabet, min_size=6, max_size=9)
 gener_floats = st.floats(min_value=57.6, max_value=57.9)
@@ -34,7 +33,7 @@ gener_stops = st.dictionaries(gener_strings, gener_posi, min_size=40, max_size=5
 @given(gener_stops)
 def test_stops(gener_stops):
     stops = gener_stops
-    tramnetwork =  tram.TramNetwork({}, stops, {}, start=None)
+    tramnetwork =  tram.TramNetwork({}, stops, {})
 
     assert len(stops) == len(tramnetwork._stopdict)
     assert list(set([stop for stop in stops.keys()])) == list(set(tramnetwork.all_stops()))

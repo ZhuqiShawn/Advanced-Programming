@@ -239,9 +239,6 @@ def demo():
     G = readTramNetwork()
     a, b = input('from,to ').split(',')
     gr.view_shortest(G, a, b, cost=lambda u, v: G.get_weight(u, v))
-    print(G.geo_distance('Chalmers', 'Valand'))
-    # G.remove_lines(['3', '4', '5', '6', '7', '8', '9', '10', '11', '13'])
-    # gr.visualize(G, 'fdp')
     
 
 if __name__ == '__main__':
