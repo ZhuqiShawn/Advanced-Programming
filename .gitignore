@@ -133,3 +133,6 @@ tramnetwork.json
 *.gv
 *.ipynb
 *.pdf
+
+# vertual env
+lab3/dat515/
