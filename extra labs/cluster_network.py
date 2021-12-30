@@ -6,8 +6,8 @@ from haversine import haversine
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-AIRPORTS_FILE = './airports.dat'
-ROUTES_FILE = './routes.dat'
+AIRPORTS_FILE = './../data/airports.dat'
+ROUTES_FILE = './../data/routes.dat'
 
 
 def mk_airportdict(AIRPORTS_FILE):
@@ -116,8 +116,6 @@ def k_means(posi_data, k=7):
         idx = np.where(labels==i)[0]
         plt.scatter(posi_data[idx, 1], posi_data[idx, 0], s = 2, alpha = 0.7, color = color)
     plt.show()
-
-
 
 if __name__ == '__main__':
 
