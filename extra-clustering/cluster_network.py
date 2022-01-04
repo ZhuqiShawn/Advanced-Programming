@@ -6,8 +6,8 @@ from haversine import haversine
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-AIRPORTS_FILE = './../data/airports.dat'
-ROUTES_FILE = './../data/routes.dat'
+AIRPORTS_FILE = './data/airports.dat'
+ROUTES_FILE = './data/routes.dat'
 
 
 def mk_airportdict(AIRPORTS_FILE):
