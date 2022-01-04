@@ -29,7 +29,6 @@ def read_white_svg(WHITEMAP_FILE):
 
     return eu_country_id, others_country
 
-
 def get_neighbors(codefile=COUNTRY_CODES_FILE, neighborfile=NEIGHBORS_FILE):
     country_dic = {}
 
@@ -52,22 +51,33 @@ def get_neighbors(codefile=COUNTRY_CODES_FILE, neighborfile=NEIGHBORS_FILE):
         country_dic[coun]['Neighbors'] = list(set(country_dic[coun]['Neighbors']))
     
     del country_dic['RU']
-    
+    # del country_dic['RU-main']
+    # del country_dic['RU-Kaliningrad']
     country_dic['RU-main']['Neighbors'].remove('LT')
     country_dic['RU-main']['Neighbors'].remove('PL')
     country_dic['RU-Kaliningrad']['Neighbors'] = ['LT', 'PL']
-
-    country_dic['RU-MAIN'] = country_dic['RU-main']
-    country_dic['RU-KALININGRAD'] = country_dic['RU-Kaliningrad']
-    del country_dic['RU-main']
-    del country_dic['RU-Kaliningrad']
+    
 
     return country_dic
-
 
 def get_map_colors(country_dic, eu_country_id):
     eu_neighbors = []
     for coun_code in eu_country_id:
+
+        if coun_code == 'RU-MAIN':
+            # continue
+            coun_code = 'RU-main'
+            for neig in country_dic[coun_code]['Neighbors']:
+                if neig in eu_country_id:
+                    eu_neighbors.append(('RU-MAIN',neig))
+
+        if coun_code == 'RU-KALININGRAD':
+            # continue
+            coun_code = 'RU-Kaliningrad'
+            for neig in country_dic[coun_code]['Neighbors']:
+                if neig in eu_country_id:
+                    eu_neighbors.append(('RU-KALININGRAD',neig))
+
         for neig in country_dic[coun_code]['Neighbors']:
             if neig in eu_country_id:
                 eu_neighbors.append((coun_code,neig))
@@ -84,6 +94,7 @@ def get_map_colors(country_dic, eu_country_id):
     colordict = co.rebuild(G, stack, colors)
     return colordict,eu_neighbors
 
+
 def color_svg_map(colordict, others_country, infile=WHITEMAP_FILE, outfile=COLORMAP_FILE):
     tree = ET.parse(infile) 
     root = tree.getroot()
@@ -97,6 +108,9 @@ def color_svg_map(colordict, others_country, infile=WHITEMAP_FILE, outfile=COLOR
 
     new_tree = ET.ElementTree(root)
     new_tree.write(outfile, encoding='utf-8')
+    
+
+    
 
 if __name__ == '__main__':
     eu_country_id, others_country = read_white_svg(WHITEMAP_FILE)
